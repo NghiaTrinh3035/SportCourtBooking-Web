@@ -1,0 +1,6 @@
+# Bỏ qua cấu hình của các Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.user
+.DS_Store 
