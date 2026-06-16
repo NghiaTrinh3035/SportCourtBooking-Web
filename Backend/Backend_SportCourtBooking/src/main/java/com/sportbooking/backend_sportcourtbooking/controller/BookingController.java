@@ -1,6 +1,7 @@
 package com.sportbooking.backend_sportcourtbooking.controller;
 
 import com.sportbooking.backend_sportcourtbooking.DTOs.BookingRequest;
+import com.sportbooking.backend_sportcourtbooking.DTOs.BookingSearchResponse;
 import com.sportbooking.backend_sportcourtbooking.DTOs.BookingStatusRequest;
 import com.sportbooking.backend_sportcourtbooking.DTOs.ApiResponse;
 import com.sportbooking.backend_sportcourtbooking.entity.Booking;
@@ -60,6 +61,12 @@ public class BookingController {
     @PreAuthorize("hasAnyRole('CUSTOMER','OWNER','STAFF')")
     public ResponseEntity<ApiResponse<Booking>> cancelBooking(@PathVariable Long id, @RequestParam(required = false) String reason) {
         return ResponseEntity.ok(new ApiResponse<>(true, "Success", bookingService.cancelBooking(id, reason)));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('OWNER','STAFF')")
+    public ResponseEntity<ApiResponse<List<BookingSearchResponse>>> searchBookings(@RequestParam String phone) {
+        return ResponseEntity.ok(new ApiResponse<>(true, "Success", bookingService.searchBookingsByPhone(phone)));
     }
 
     // OLD CODE - KEEP FOR BACKUP

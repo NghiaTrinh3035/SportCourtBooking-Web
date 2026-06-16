@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export type PaymentMethod = 'CASH' | 'BANK_TRANSFER';
+export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'VNPAY';
 
 export class PaymentRequest {
   @IsNotEmpty({ message: 'Mã đơn không được để trống' })
@@ -16,6 +16,7 @@ export class PaymentRequest {
   paymentMethod: PaymentMethod = 'CASH';
 
   transactionRef?: string;
+  bookingInfo?: string;
 }
 
 export interface Payment {
@@ -25,5 +26,11 @@ export interface Payment {
   paymentMethod: PaymentMethod;
   status: string;
   transactionRef?: string;
-  paymentTime?: string;
+  bookingInfo?: string;
+}
+
+export interface PaymentResponse {
+  status: string;
+  message: string;
+  paymentUrl: string;
 }

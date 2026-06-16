@@ -1,4 +1,4 @@
-import type { Booking, BookingRequest, BookingStatus } from '../entities/booking/types';
+import type { Booking, BookingRequest, BookingStatus, BookingSearchResponse } from '../entities/booking/types';
 // import httpClient from '../shared/lib/httpClient';
 import { bookingApiRepository } from '../features/bookings/repositories/bookingApi.repository';
 
@@ -29,6 +29,10 @@ const bookingService = {
 
   async cancelBooking(id: number, reason?: string): Promise<Booking> {
     return await bookingApiRepository.cancelBooking(id, reason);
+  },
+
+  async searchBookingsByPhone(phone: string): Promise<BookingSearchResponse[]> {
+    return await bookingApiRepository.searchBookingsByPhone(phone);
   },
 
   // OLD CODE - KEEP FOR BACKUP

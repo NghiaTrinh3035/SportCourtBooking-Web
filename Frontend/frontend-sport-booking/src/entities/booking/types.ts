@@ -8,6 +8,17 @@ export type BookingStatus =
   | 'CANCELED'
   | 'COMPLETED';
 
+export interface BookingSearchResponse {
+  bookingId: number;
+  courtName: string;
+  startTime: string;
+  endTime: string;
+  totalPrice: number;
+  customerName: string;
+  customerPhone: string;
+  status: 'PENDING' | 'CONFIRMED' | 'DEPOSITED' | 'COMPLETED' | 'CANCELED';
+}
+
 export interface BookingRequest {
   courtId: number;
   startTime: string;

@@ -1,6 +1,7 @@
 package com.sportbooking.backend_sportcourtbooking.service;
 
 import com.sportbooking.backend_sportcourtbooking.DTOs.BookingRequest;
+import com.sportbooking.backend_sportcourtbooking.DTOs.BookingSearchResponse;
 import com.sportbooking.backend_sportcourtbooking.DTOs.BookingStatusRequest;
 import com.sportbooking.backend_sportcourtbooking.entity.*;
 import com.sportbooking.backend_sportcourtbooking.enums.BookingStatus;
@@ -46,6 +47,24 @@ public class BookingService {
 
     public List<Booking> getBookingsByStatus(BookingStatus status) {
         return bookingRepository.findByStatus(status);
+    }
+
+    public List<BookingSearchResponse> searchBookingsByPhone(String phone) {
+        List<Booking> bookings = bookingRepository.findByUserPhone(phone);
+        List<BookingSearchResponse> responses = new ArrayList<>();
+        for (Booking b : bookings) {
+            BookingSearchResponse dto = new BookingSearchResponse();
+            dto.setBookingId(b.getId());
+            dto.setCourtName(b.getCourt() != null ? b.getCourt().getName() : "");
+            dto.setStartTime(b.getStartTime());
+            dto.setEndTime(b.getEndTime());
+            dto.setTotalPrice(b.getTotalPrice());
+            dto.setCustomerName(b.getUser() != null ? b.getUser().getFullName() : "");
+            dto.setCustomerPhone(b.getUser() != null ? b.getUser().getPhone() : "");
+            dto.setStatus(b.getStatus());
+            responses.add(dto);
+        }
+        return responses;
     }
 
     @Transactional
@@ -177,6 +196,38 @@ public class BookingService {
         );
 
         return canceledIds.size();
+    }
+
+    @Transactional
+    public int autoCompleteExpiredDepositedBookings() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> expiredBookings = bookingRepository.findByStatusAndEndTimeLessThanEqual(BookingStatus.DEPOSITED, now);
+
+        if (expiredBookings.isEmpty()) {
+            return 0;
+        }
+
+        List<Long> completedIds = new ArrayList<>();
+        for (Booking booking : expiredBookings) {
+            booking.setStatus(BookingStatus.COMPLETED);
+            removeBookingBlock(booking.getId());
+            completedIds.add(booking.getId());
+
+            notificationService.createNotification(
+                    booking.getUser().getId(),
+                    "Đơn sân #" + booking.getId() + " đã tự động hoàn tất do hết thời gian sử dụng.",
+                    "/history"
+            );
+        }
+
+        bookingRepository.saveAll(expiredBookings);
+        notificationService.notifyStaffAndOwners(
+                "Hệ thống đã tự động hoàn tất " + completedIds.size() + " đơn (đã chơi xong): " + completedIds,
+            "/owner/bookings",
+            "/staff/operations"
+        );
+
+        return completedIds.size();
     }
 
     @Transactional

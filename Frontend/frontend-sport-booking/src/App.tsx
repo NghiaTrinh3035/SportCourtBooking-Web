@@ -11,6 +11,7 @@ import OwnerUsersPage from './features/owner/pages/OwnerUsersPage';
 import PaymentPage from './features/payment/pages/PaymentPage';
 import ProfilePage from './features/profile/pages/ProfilePage';
 import StaffOperationsPage from './features/staff/pages/StaffOperationsPage';
+import BookingSearchPage from './features/staff/pages/BookingSearchPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTES } from './shared/constants/routes';
 import { useAuth } from './shared/hooks/useAuth';
@@ -55,6 +56,7 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={['OWNER', 'STAFF']} />}>
           <Route path={ROUTES.staffOperations} element={<StaffOperationsPage />} />
+          <Route path={ROUTES.staffSearch} element={<BookingSearchPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
