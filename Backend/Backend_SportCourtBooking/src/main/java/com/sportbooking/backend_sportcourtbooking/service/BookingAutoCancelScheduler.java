@@ -22,4 +22,9 @@ public class BookingAutoCancelScheduler {
     public void releaseExpiredBookingBlocks() {
         bookingService.releaseExpiredBookingBlocks(BLOCK_RELEASE_BUFFER_MINUTES);
     }
+
+    @Scheduled(fixedDelay = 60000) // Chạy mỗi phút
+    public void autoCompleteExpiredDepositedBookings() {
+        bookingService.autoCompleteExpiredDepositedBookings();
+    }
 }

@@ -14,4 +14,6 @@ public class PaymentRequest {
     @NotBlank
     private String paymentMethod;   // "CASH" hoặc "BANK_TRANSFER"
     private String transactionRef;  // Mã giao dịch
+    
+    private String bookingInfo;
 }

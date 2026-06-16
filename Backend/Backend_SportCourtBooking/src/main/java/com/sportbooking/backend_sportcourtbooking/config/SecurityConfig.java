@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/ws/**", "/ws").permitAll()
+                        .requestMatchers("/api/payments/vnpay-return").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/courts/**", "/api/sports/**").permitAll()
                         .anyRequest().authenticated()
                 )

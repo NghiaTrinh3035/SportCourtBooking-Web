@@ -1,4 +1,4 @@
-import { CalendarClock, House, Settings2, ShieldUser, Trophy, UserRound, Users } from 'lucide-react';
+import { CalendarClock, House, Settings2, ShieldUser, Trophy, UserRound, Users, Search } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import type { UserRole } from '../../entities/user/types';
 import { ROUTES } from '../constants/routes';
@@ -19,9 +19,11 @@ const roleNavItems: Record<Exclude<UserRole, 'ADMIN'>, Array<{ label: string; pa
     { label: 'Môn & Sân', path: ROUTES.ownerCourts, icon: CalendarClock },
     { label: 'Người dùng', path: ROUTES.ownerUsers, icon: Users },
     { label: 'Vận hành Staff', path: ROUTES.staffOperations, icon: Settings2 },
+    { label: 'Tra cứu đơn', path: ROUTES.staffSearch, icon: Search },
   ],
   STAFF: [
     { label: 'Staff Operations', path: ROUTES.staffOperations, icon: Settings2 },
+    { label: 'Tra cứu đơn', path: ROUTES.staffSearch, icon: Search },
     { label: 'Trang chủ', path: ROUTES.home, icon: House },
   ],
 };

@@ -1,6 +1,6 @@
 import { CheckCircle2, CreditCard, Landmark, Banknote, PartyPopper } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { Booking } from '../../../entities/booking/types';
 import type { PaymentMethod } from '../../../entities/payment/types';
 import bookingService from '../../../services/bookingService';
@@ -24,6 +24,13 @@ const PaymentPage = () => {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('payment_status') === 'success') {
+      setSuccess(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!Number.isFinite(bookingId)) {
@@ -54,18 +61,38 @@ const PaymentPage = () => {
     const depositAmount = Math.round(booking.totalPrice * 0.3);
 
     try {
-      await paymentService.processPayment({
-        bookingId: booking.id,
-        amount: depositAmount,
-        paymentMethod: method,
-        transactionRef: method === 'BANK_TRANSFER' ? `TXN${Date.now()}` : undefined,
-      });
+      if (method === 'VNPAY') {
+        const response = await paymentService.createVnPayPayment({
+          bookingId: booking.id,
+          amount: depositAmount,
+          paymentMethod: method,
+          transactionRef: `TXN${Date.now()}`,
+          bookingInfo: `Thanh toan don dat san ${booking.id}`,
+        });
 
-      setSuccess(true);
+        if (response.paymentUrl) {
+          window.location.href = response.paymentUrl;
+          return; // Do not clear loading state since page will redirect
+        } else {
+          setError('Không thể lấy được đường dẫn thanh toán VNPAY');
+        }
+      } else {
+        await paymentService.processPayment({
+          bookingId: booking.id,
+          amount: depositAmount,
+          paymentMethod: method,
+          transactionRef: method === 'BANK_TRANSFER' ? `TXN${Date.now()}` : undefined,
+          bookingInfo: `Thanh toan don dat san ${booking.id}`,
+        });
+
+        setSuccess(true);
+      }
     } catch (paymentError) {
       setError(getApiErrorMessage(paymentError));
     } finally {
-      setPaying(false);
+      if (method !== 'VNPAY' || error) {
+        setPaying(false);
+      }
     }
   };
 
@@ -174,22 +201,22 @@ const PaymentPage = () => {
 
                   <button
                     type="button"
-                    onClick={() => setMethod('BANK_TRANSFER')}
-                    className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
-                      method === 'BANK_TRANSFER'
-                        ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-500/10'
-                        : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-sm'
+                    onClick={() => setMethod('VNPAY')}
+                    className={`col-span-2 flex items-center justify-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
+                      method === 'VNPAY'
+                        ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-500/10'
+                        : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm'
                     }`}
                   >
                     <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                      method === 'BANK_TRANSFER'
-                        ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-md'
+                      method === 'VNPAY'
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-400'
                     }`}>
-                      <Landmark size={20} />
+                      <CreditCard size={20} />
                     </div>
-                    <span className={`text-sm font-bold ${method === 'BANK_TRANSFER' ? 'text-teal-800' : 'text-slate-600'}`}>
-                      Chuyển khoản
+                    <span className={`text-sm font-bold ${method === 'VNPAY' ? 'text-blue-800' : 'text-slate-600'}`}>
+                      Thanh toán qua VNPAY
                     </span>
                   </button>
                 </div>

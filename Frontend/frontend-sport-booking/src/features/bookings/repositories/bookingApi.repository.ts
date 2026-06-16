@@ -1,4 +1,4 @@
-import type { Booking, BookingRequest, BookingStatus } from '../../../entities/booking/types';
+import type { Booking, BookingRequest, BookingStatus, BookingSearchResponse } from '../../../entities/booking/types';
 import { apiClient } from '../../../core/api/apiClient';
 
 export const bookingApiRepository = {
@@ -32,6 +32,12 @@ export const bookingApiRepository = {
   async cancelBooking(id: number, reason?: string): Promise<Booking> {
     return await apiClient.put<Booking>(`/bookings/${id}/cancel`, null, {
       params: reason ? { reason } : undefined,
+    });
+  },
+
+  async searchBookingsByPhone(phone: string): Promise<BookingSearchResponse[]> {
+    return await apiClient.get<BookingSearchResponse[]>('/bookings/search', {
+      params: { phone }
     });
   }
 };

@@ -8,5 +8,6 @@ export const ROUTES = {
   ownerUsers: '/owner/users',
   ownerCourts: '/owner/courts',
   staffOperations: '/staff/operations',
+  staffSearch: '/staff/search',
   payment: '/payment',
 } as const;

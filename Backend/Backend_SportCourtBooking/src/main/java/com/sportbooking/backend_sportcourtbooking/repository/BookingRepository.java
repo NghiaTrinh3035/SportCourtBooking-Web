@@ -27,7 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 
     // 1. Tìm kiếm Booking theo SĐT khách hàng (Chức năng search booking)
-    @Query("SELECT b FROM Booking b WHERE b.user.phone LIKE %:phone%")
+    @Query("SELECT b FROM Booking b WHERE b.user.phone LIKE %:phone% ORDER BY b.startTime DESC")
     List<Booking> findByUserPhone(@Param("phone") String phone);
 
     // 2. Lấy danh sách booking trong một khoảng thời gian (Dùng để hiển thị lên Lịch Admin)
@@ -62,4 +62,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("paidStatus") PaymentStatus paidStatus,
             @Param("cutoff") LocalDateTime cutoff
     );
+
+    List<Booking> findByStatusAndEndTimeLessThanEqual(BookingStatus status, LocalDateTime endTime);
 }

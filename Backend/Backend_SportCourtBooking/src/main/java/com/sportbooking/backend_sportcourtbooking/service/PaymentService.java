@@ -97,4 +97,64 @@ public class PaymentService {
 
         return savedPayment;
     }
+
+    @Transactional
+    public Payment processVnPayCallback(Long bookingId, BigDecimal amount, String transactionRef) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt sân với ID: " + bookingId));
+
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new RuntimeException("Đơn không ở trạng thái chờ cọc");
+        }
+
+        Payment existingPayment = paymentRepository.findByBooking_Id(booking.getId());
+        if (existingPayment != null) {
+            return existingPayment; // Đã thanh toán
+        }
+
+        BigDecimal requiredDeposit = booking.getTotalPrice()
+                .multiply(DEPOSIT_RATE)
+                .setScale(0, RoundingMode.HALF_UP);
+
+        if (amount.compareTo(requiredDeposit) != 0) {
+            throw new RuntimeException("Số tiền cọc không khớp: " + requiredDeposit);
+        }
+
+        Payment payment = new Payment();
+        payment.setBooking(booking);
+        payment.setAmount(amount);
+        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setPaymentMethod(PaymentMethod.VNPAY);
+        payment.setTransactionRef(transactionRef);
+        payment.setPaymentTime(LocalDateTime.now());
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        booking.setStatus(BookingStatus.DEPOSITED);
+        booking.setConfirmedAt(null);
+        bookingRepository.save(booking);
+
+        if (!courtBlockRepository.existsByBookingId(booking.getId())) {
+            CourtBlock block = new CourtBlock();
+            block.setCourt(booking.getCourt());
+            block.setBooking(booking);
+            block.setStartTime(booking.getStartTime());
+            block.setEndTime(booking.getEndTime());
+            block.setReason("Giữ chỗ theo cọc đơn #" + booking.getId());
+            courtBlockRepository.save(block);
+        }
+
+        notificationService.createNotification(
+                booking.getUser().getId(),
+                "Cọc thành công đơn #" + booking.getId() + " qua VNPAY.",
+                "/history"
+        );
+        notificationService.notifyStaffAndOwners(
+                "Đơn #" + booking.getId() + " đã cọc qua VNPAY.",
+            "/owner/revenue",
+            "/staff/operations"
+        );
+
+        return savedPayment;
+    }
 }

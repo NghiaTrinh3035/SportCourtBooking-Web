@@ -32,7 +32,7 @@ public class AdminDashboardService {
         BigDecimal revenue = bookingRepository.calculateRevenue(
                 start,
                 end,
-                List.of(BookingStatus.CONFIRMED, BookingStatus.COMPLETED)
+                List.of(BookingStatus.CONFIRMED, BookingStatus.DEPOSITED, BookingStatus.COMPLETED)
         );
         response.setTotalRevenue(revenue == null ? BigDecimal.ZERO : revenue);
         return response;

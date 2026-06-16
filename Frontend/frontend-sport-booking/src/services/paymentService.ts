@@ -1,10 +1,14 @@
-import type { Payment, PaymentRequest } from '../entities/payment/types';
+import type { Payment, PaymentRequest, PaymentResponse } from '../entities/payment/types';
 // import httpClient from '../shared/lib/httpClient';
 import { paymentApiRepository } from '../features/payments/repositories/paymentApi.repository';
 
 const paymentService = {
   async processPayment(data: PaymentRequest): Promise<Payment> {
     return await paymentApiRepository.processPayment(data);
+  },
+
+  async createVnPayPayment(data: PaymentRequest): Promise<PaymentResponse> {
+    return await paymentApiRepository.createVnPayPayment(data);
   },
 
   // OLD CODE - KEEP FOR BACKUP
