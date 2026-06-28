@@ -1,4 +1,4 @@
-import { CheckCircle2, CreditCard, Landmark, Banknote, PartyPopper } from 'lucide-react';
+import { CheckCircle2, CreditCard, Banknote, PartyPopper } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { Booking } from '../../../entities/booking/types';

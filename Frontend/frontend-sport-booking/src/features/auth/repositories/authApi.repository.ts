@@ -14,6 +14,12 @@ export const authApiRepository = {
     });
   },
 
+  async loginWithGoogle(credential: string): Promise<LoginResponse> {
+    return await apiClient.post<LoginResponse>('/auth/google', {
+      credential,
+    });
+  },
+
   async requestRegisterOtp(data: RegisterRequest): Promise<{ message: string }> {
     return await apiClient.post<{ message: string }>('/auth/register', data);
   },

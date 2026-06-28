@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+import { GoogleLogin } from '@react-oauth/google';
 import { RegisterRequest } from '../../../entities/user/types';
 import authService from '../../../services/authService';
 import { ROUTES } from '../../../shared/constants/routes';
@@ -28,6 +29,28 @@ const RegisterPage = () => {
 
   const handleChange = (field: keyof RegisterRequest, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!credentialResponse.credential) return;
+    setError('');
+    setLoading(true);
+
+    try {
+      const user = await authService.loginWithGoogle(credentialResponse.credential);
+
+      if (user.role === 'OWNER') {
+        navigate(ROUTES.ownerDashboard);
+      } else if (user.role === 'STAFF') {
+        navigate(ROUTES.staffOperations);
+      } else {
+        navigate(ROUTES.home);
+      }
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRequestOtp = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -190,6 +213,23 @@ const RegisterPage = () => {
             </Button>
           </form>
         )}
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium text-slate-400">HOẶC</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Đăng nhập Google thất bại.')}
+            theme="outline"
+            size="large"
+            width="450"
+            text="signup_with"
+          />
+        </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Đã có tài khoản?{' '}

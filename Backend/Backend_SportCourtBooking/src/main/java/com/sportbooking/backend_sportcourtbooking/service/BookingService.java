@@ -301,8 +301,12 @@ public class BookingService {
     }
 
     private void removeBookingBlock(Long bookingId) {
-        if (courtBlockRepository.existsByBookingId(bookingId)) {
-            courtBlockRepository.deleteByBookingId(bookingId);
+        try {
+            if (courtBlockRepository.existsByBookingId(bookingId)) {
+                courtBlockRepository.deleteByBookingId(bookingId);
+            }
+        } catch (Exception ignored) {
+            // Bỏ qua lỗi nếu CourtBlock đã bị transaction khác xóa trước đó
         }
     }
 

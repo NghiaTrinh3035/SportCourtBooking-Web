@@ -1,6 +1,7 @@
 import { LogIn, Mail, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import authService from '../../../services/authService';
 import { ROUTES } from '../../../shared/constants/routes';
 import { getApiErrorMessage } from '../../../shared/utils/apiError';
@@ -22,6 +23,28 @@ const LoginPage = () => {
 
     try {
       const user = await authService.login(email, password);
+
+      if (user.role === 'OWNER') {
+        navigate(ROUTES.ownerDashboard);
+      } else if (user.role === 'STAFF') {
+        navigate(ROUTES.staffOperations);
+      } else {
+        navigate(ROUTES.home);
+      }
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!credentialResponse.credential) return;
+    setError('');
+    setLoading(true);
+
+    try {
+      const user = await authService.loginWithGoogle(credentialResponse.credential);
 
       if (user.role === 'OWNER') {
         navigate(ROUTES.ownerDashboard);
@@ -89,6 +112,23 @@ const LoginPage = () => {
             {loading ? 'Đang xử lý...' : 'Đăng nhập ngay'}
           </Button>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium text-slate-400">HOẶC</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Đăng nhập Google thất bại.')}
+            theme="outline"
+            size="large"
+            width="380"
+            text="signin_with"
+          />
+        </div>
 
         <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-teal-100 bg-teal-50/50 px-3.5 py-2.5 text-xs text-teal-700">
           <ShieldCheck size={14} className="shrink-0" />
