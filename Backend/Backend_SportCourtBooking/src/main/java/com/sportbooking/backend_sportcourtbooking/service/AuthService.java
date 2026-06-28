@@ -10,8 +10,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     @Value("${application.security.otp.expiration-minutes:5}")
     private int otpExpirationMinutes;
+
+    @Value("${google.client-id:YOUR_GOOGLE_CLIENT_ID_PLACEHOLDER}")
+    private String googleClientId;
 
     public void requestRegistrationOtp(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -125,6 +134,64 @@ public class AuthService {
         return response;
 
     }
+
+    // Đăng nhập bằng Google OAuth2
+    public UserResponse loginWithGoogle(GoogleLoginRequest request) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(request.getCredential());
+            if (idToken == null) {
+                throw new RuntimeException("Token Google không hợp lệ hoặc đã hết hạn!");
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            if (name == null || name.trim().isEmpty()) {
+                name = email.substring(0, email.indexOf('@'));
+            }
+
+            // Kiểm tra user trong DB theo email
+            User user = userRepository.findByEmail(email).orElse(null);
+
+            if (user == null) {
+                // Lần đầu đăng nhập bằng Google -> Tạo tài khoản mới với mật khẩu ngẫu nhiên (Dummy UUID Password)
+                String dummyPassword = UUID.randomUUID().toString();
+                user = User.builder()
+                        .fullName(name)
+                        .email(email)
+                        .password(passwordEncoder.encode(dummyPassword))
+                        .role(UserRole.CUSTOMER)
+                        .build();
+
+                user = userRepository.save(user);
+
+                notificationService.createNotification(
+                        user.getId(),
+                        "🎉 Chào mừng " + user.getFullName() + " đến với hệ thống đặt sân qua Google!",
+                        "/"
+                );
+
+                notificationService.notifyStaffAndOwners(
+                        "👤 Người dùng mới đăng ký qua Google: " + user.getFullName(),
+                        "/owner/users",
+                        "/staff/operations"
+                );
+            }
+            // Nếu user đã tồn tại -> Bỏ qua kiểm tra mật khẩu, lấy thông tin user để tạo Token
+
+            String jwtToken = jwtService.generateToken(user);
+            UserResponse response = mapToResponse(user);
+            response.setToken(jwtToken);
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException("Đăng nhập Google thất bại: " + e.getMessage(), e);
+        }
+    }
+
 
 
     // Tạo khách vãng lai

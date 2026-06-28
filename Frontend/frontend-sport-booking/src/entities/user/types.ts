@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumberString, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 
 export type UserRole = 'CUSTOMER' | 'OWNER' | 'STAFF' | 'ADMIN';
 

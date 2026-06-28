@@ -1,6 +1,7 @@
 package com.sportbooking.backend_sportcourtbooking.controller;
 
 
+import com.sportbooking.backend_sportcourtbooking.DTOs.GoogleLoginRequest;
 import com.sportbooking.backend_sportcourtbooking.DTOs.LoginRequest;
 import com.sportbooking.backend_sportcourtbooking.DTOs.RegisterRequest;
 import com.sportbooking.backend_sportcourtbooking.DTOs.UserResponse;
@@ -35,6 +36,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody LoginRequest request){
         return ResponseEntity.ok(new ApiResponse<>(true, "Success", authService.login(request)));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<UserResponse>> loginWithGoogle(@Valid @RequestBody GoogleLoginRequest request){
+        return ResponseEntity.ok(new ApiResponse<>(true, "Success", authService.loginWithGoogle(request)));
     }
 
     @PostMapping("/walk-in")

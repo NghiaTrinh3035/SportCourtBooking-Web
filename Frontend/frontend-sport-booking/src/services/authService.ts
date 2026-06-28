@@ -16,6 +16,14 @@ const authService = {
     return user as User;
   },
 
+  async loginWithGoogle(credential: string): Promise<User> {
+    const response = await authApiRepository.loginWithGoogle(credential);
+    const { token, ...user } = response;
+    localStorage.setItem(STORAGE_KEYS.accessToken, token);
+    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+    return user as User;
+  },
+
   async requestRegisterOtp(data: RegisterRequest): Promise<{ message: string }> {
     return await authApiRepository.requestRegisterOtp(data);
   },
