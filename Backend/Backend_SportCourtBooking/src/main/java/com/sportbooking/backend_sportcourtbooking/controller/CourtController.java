@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +41,15 @@ public class CourtController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Court>> getCourtById(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>(true, "Success", courtService.getCourtById(id)));
+    }
+
+    @GetMapping("/{id}/schedule")
+    public ResponseEntity<ApiResponse<CourtScheduleResponse>> getCourtSchedule(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        LocalDate queryDate = (date != null) ? date : LocalDate.now();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Success", courtService.getCourtSchedule(id, queryDate)));
     }
 
     @PostMapping

@@ -52,3 +52,18 @@ export interface CourtBlockRequest {
   endTime: string;
   reason: string;
 }
+
+export interface OccupiedSlot {
+  startTime: string;
+  endTime: string;
+  type: 'BOOKED' | 'BLOCKED';
+}
+
+export interface CourtScheduleResponse {
+  courtId: number;
+  date: string;
+  openTime: string;
+  closeTime: string;
+  occupiedSlots: OccupiedSlot[];
+}
+

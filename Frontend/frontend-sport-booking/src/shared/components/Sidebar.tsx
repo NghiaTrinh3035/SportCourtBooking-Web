@@ -12,7 +12,7 @@ const commonNavItems = [
 const roleNavItems: Record<Exclude<UserRole, 'ADMIN'>, Array<{ label: string; path: string; icon: typeof House }>> = {
   CUSTOMER: [
     { label: 'Trang chủ', path: ROUTES.home, icon: House },
-    { label: 'Đặt sân', path: `${ROUTES.booking}/1`, icon: CalendarClock },
+    { label: 'Đặt sân', path: ROUTES.booking, icon: CalendarClock },
   ],
   OWNER: [
     { label: 'Dashboard', path: ROUTES.ownerDashboard, icon: ShieldUser },
@@ -46,7 +46,7 @@ const Sidebar = ({ className = '' }: SidebarProps) => {
       ? roleNavItems[role]
       : [
           { label: 'Trang chủ', path: ROUTES.home, icon: House },
-          { label: 'Đặt sân', path: `${ROUTES.booking}/1`, icon: CalendarClock },
+          { label: 'Đặt sân', path: ROUTES.booking, icon: CalendarClock },
         ];
   const navItems = [...dynamicNav, ...commonNavItems];
 

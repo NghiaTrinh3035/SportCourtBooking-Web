@@ -64,4 +64,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
 
     List<Booking> findByStatusAndEndTimeLessThanEqual(BookingStatus status, LocalDateTime endTime);
+
+    @Query("SELECT b FROM Booking b WHERE b.court.id = :courtId " +
+           "AND b.status <> com.sportbooking.backend_sportcourtbooking.enums.BookingStatus.CANCELED " +
+           "AND b.startTime < :endOfDay AND b.endTime > :startOfDay " +
+           "ORDER BY b.startTime ASC")
+    List<Booking> findOccupiedBookingsByCourtAndDate(@Param("courtId") Long courtId,
+                                                     @Param("startOfDay") LocalDateTime startOfDay,
+                                                     @Param("endOfDay") LocalDateTime endOfDay);
 }
+
