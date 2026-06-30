@@ -43,6 +43,7 @@ function App() {
         <Route path={ROUTES.register} element={<RegisterPage />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path={ROUTES.booking} element={<BookingPage />} />
           <Route path={`${ROUTES.booking}/:id`} element={<BookingPage />} />
           <Route path={`${ROUTES.payment}/:id`} element={<PaymentPage />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />

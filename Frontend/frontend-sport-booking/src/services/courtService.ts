@@ -5,6 +5,7 @@ import type {
   CourtPriceRule,
   CourtPriceRuleRequest,
   CourtRequest,
+  CourtScheduleResponse,
 } from '../entities/court/types';
 // import httpClient from '../shared/lib/httpClient';
 import { courtApiRepository } from '../features/courts/repositories/courtApi.repository';
@@ -16,6 +17,10 @@ const courtService = {
 
   async getCourtById(id: number): Promise<Court> {
     return await courtApiRepository.getCourtById(id);
+  },
+
+  async getCourtSchedule(courtId: number, date?: string): Promise<CourtScheduleResponse> {
+    return await courtApiRepository.getCourtSchedule(courtId, date);
   },
 
   async getAvailableCourts(params: {
