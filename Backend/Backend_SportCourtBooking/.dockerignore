@@ -1,0 +1,65 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.eml
+*.classpath
+*.project
+.settings/
+
+# Maven build output
+target/
+
+# Maven wrapper (optional, already copied in Dockerfile if needed)
+# Uncomment below if you do NOT want mvnw in the image context
+# mvnw
+# mvnw.cmd
+# .mvn/
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation and markdown
+*.md
+docs/
+
+# Docker files (avoid recursive inclusion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Test reports
+test-results/
+surefire-reports/
+
+# Environment and secrets (never include these)
+.env
+*.env
+*.pem
+*.key
+*.jks
+*.p12
+
+# Node / Frontend (if any)
+node_modules/
+npm-debug.log
