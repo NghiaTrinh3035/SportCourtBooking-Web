@@ -2,6 +2,8 @@ package com.sportbooking.backend_sportcourtbooking.repository;
 
 import com.sportbooking.backend_sportcourtbooking.entity.CourtBlock;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -25,4 +27,12 @@ public interface CourtBlockRepository extends JpaRepository<CourtBlock, Long> {
     List<CourtBlock> findByBookingIdIsNotNullAndEndTimeLessThanEqual(LocalDateTime cutoff);
 
     void deleteByCourtId(Long courtId);
+
+    @Query("SELECT cb FROM CourtBlock cb WHERE cb.court.id = :courtId " +
+           "AND cb.startTime < :endOfDay AND cb.endTime > :startOfDay " +
+           "ORDER BY cb.startTime ASC")
+    List<CourtBlock> findBlocksByCourtAndDate(@Param("courtId") Long courtId,
+                                              @Param("startOfDay") LocalDateTime startOfDay,
+                                              @Param("endOfDay") LocalDateTime endOfDay);
 }
+

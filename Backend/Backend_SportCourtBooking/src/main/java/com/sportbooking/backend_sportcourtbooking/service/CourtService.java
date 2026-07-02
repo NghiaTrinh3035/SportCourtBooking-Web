@@ -2,13 +2,18 @@ package com.sportbooking.backend_sportcourtbooking.service;
 
 import com.sportbooking.backend_sportcourtbooking.DTOs.CourtBlockRequest;
 import com.sportbooking.backend_sportcourtbooking.DTOs.CourtRequest;
+import com.sportbooking.backend_sportcourtbooking.DTOs.CourtScheduleResponse;
+import com.sportbooking.backend_sportcourtbooking.DTOs.OccupiedSlot;
 import com.sportbooking.backend_sportcourtbooking.entity.*;
 import com.sportbooking.backend_sportcourtbooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,6 +156,41 @@ public class CourtService {
             "/owner/courts",
             "/staff/operations"
         );
+    }
+
+    public CourtScheduleResponse getCourtSchedule(Long courtId, LocalDate date) {
+        Court court = getCourtById(courtId);
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        List<Booking> bookings = bookingRepository.findOccupiedBookingsByCourtAndDate(courtId, startOfDay, endOfDay);
+        List<CourtBlock> blocks = courtBlockRepository.findBlocksByCourtAndDate(courtId, startOfDay, endOfDay);
+
+        List<OccupiedSlot> occupiedSlots = new ArrayList<>();
+        for (Booking b : bookings) {
+            occupiedSlots.add(OccupiedSlot.builder()
+                    .startTime(b.getStartTime())
+                    .endTime(b.getEndTime())
+                    .type("BOOKED")
+                    .build());
+        }
+        for (CourtBlock cb : blocks) {
+            occupiedSlots.add(OccupiedSlot.builder()
+                    .startTime(cb.getStartTime())
+                    .endTime(cb.getEndTime())
+                    .type("BLOCKED")
+                    .build());
+        }
+
+        occupiedSlots.sort(Comparator.comparing(OccupiedSlot::getStartTime));
+
+        return CourtScheduleResponse.builder()
+                .courtId(court.getId())
+                .date(date.toString())
+                .openTime(court.getOpenTime())
+                .closeTime(court.getCloseTime())
+                .occupiedSlots(occupiedSlots)
+                .build();
     }
 
     private void validateCourtRequest(CourtRequest request) {

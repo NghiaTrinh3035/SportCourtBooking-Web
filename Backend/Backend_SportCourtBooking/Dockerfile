@@ -16,7 +16,7 @@ COPY mvnw .
 # Cấp quyền thực thi cho file mvnw trên Linux
 RUN chmod +x mvnw
 
-# Download all dependencies
+# Download all dependencies (cached layer)
 RUN ./mvnw dependency:go-offline -B
 
 # Copy the rest of the source code
